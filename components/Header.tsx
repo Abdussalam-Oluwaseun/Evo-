@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { Settings } from 'lucide-react';
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -28,14 +27,12 @@ export default function Header({ onOpenConfig, provider, hasApiKey }: HeaderProp
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="relative size-10 rounded-lg overflow-hidden flex-shrink-0">
-            <Image
-              src="/logo.png"
-              alt="Evo Logo"
-              fill
-              className="object-cover"
-              priority
-            />
+          <div className="bg-[#135bec] text-white p-1.5 rounded-lg flex items-center justify-center">
+            <div className="size-5 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            </div>
           </div>
           <h2 className="text-xl font-bold tracking-tight text-slate-900">evo</h2>
         </div>

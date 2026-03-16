@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for Evo Resume Backend - Optimized for Railway
+# Multi-stage Dockerfile for Evo Resume Backend - Optimized for Render
 FROM python:3.13-slim as builder
 
 WORKDIR /app
@@ -32,15 +32,15 @@ ENV PATH=/root/.local/bin:$PATH
 # Copy application code
 COPY . .
 
-# Set Python to run in unbuffered mode (important for Railway logs)
+# Set Python to run in unbuffered mode (important for Render logs)
 ENV PYTHONUNBUFFERED=1
 
-# Expose port (Railway will use $PORT env variable)
+# Expose port (Render will use $PORT env variable)
 EXPOSE 8000
 
-# Health check for Railway
+# Health check for Render
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/supported-providers')" || exit 1
 
-# Start application (Railway sets PORT env var automatically)
+# Start application (Render sets PORT env var automatically)
 CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

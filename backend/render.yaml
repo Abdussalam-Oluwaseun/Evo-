@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: evo-resume-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: PYTHONDONTWRITEBYTECODE
+        value: 1
+    healthCheckPath: /supported-providers
+    healthCheckInterval: 30

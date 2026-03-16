@@ -1,0 +1,6 @@
+<svg viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Favicon version of logo -->
+  <path d="M 40 100 C 40 60 65 40 100 40 C 135 40 160 60 160 100 C 160 130 145 155 100 170" />
+  <line x1="75" y1="100" x2="155" y2="100" />
+  <path d="M 100 170 L 50 270 C 45 280 50 290 60 295" />
+</svg>
