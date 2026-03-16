@@ -102,7 +102,7 @@ export default function ResultsSection({ tailoredResume, coverLetter, isGenerati
               <div className="h-2 bg-slate-50 rounded w-full"></div>
             </div>
           ) : coverLetter ? (
-            <div className="prose prose-sm max-w-none text-slate-700 whitespace-pre-wrap">
+            <div className="prose prose-sm  max-w-none text-slate-700 whitespace-pre-wrap">
               {coverLetter}
             </div>
           ) : (
