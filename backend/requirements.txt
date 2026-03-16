@@ -1,0 +1,12 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pdfplumber==0.11.4
+python-multipart==0.0.20
+pydantic==2.10.5
+pydantic-settings==2.7.1
+python-dotenv==1.0.1
+
+# AI Provider SDKs
+google-generativeai==0.8.4
+openai>=1.60.0
+anthropic>=0.42.0

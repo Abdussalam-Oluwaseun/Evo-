@@ -1,69 +1,99 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Header from '@/components/Header';
 import InputSection from '@/components/InputSection';
 import ResultsSection from '@/components/ResultsSection';
 import ConfigModal from '@/components/ConfigModal';
-import { GoogleGenAI } from "@google/genai";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+export interface AIConfig {
+  apiKey: string;
+  provider: string;
+  model: string;
+}
 
 export default function Page() {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
-  const [resumeText, setResumeText] = useState('');
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [tailoredResume, setTailoredResume] = useState('');
   const [coverLetter, setCoverLetter] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleResumeUpload = (file: File) => {
-    // In a real app, we'd use a library to parse PDF/Docx
-    // For this demo, we'll simulate extracting text
-    setResumeText("John Doe\nSoftware Engineer\nExperience: 5 years at TechCorp...");
-    alert(`File "${file.name}" uploaded. (Text extraction simulated)`);
-  };
+  // AI configuration state — persists across modal open/close
+  const [aiConfig, setAiConfig] = useState<AIConfig>({
+    apiKey: '',
+    provider: 'gemini',
+    model: '',
+  });
+
+  const handleResumeUpload = useCallback((file: File) => {
+    setResumeFile(file);
+    setError(null);
+  }, []);
 
   const generateApplication = async () => {
-    if (!jobDescription) {
-      alert("Please provide a job description.");
+    if (!resumeFile) {
+      setError('Please upload a PDF resume first.');
+      return;
+    }
+    if (!jobDescription || jobDescription.length < 50) {
+      setError('Please provide a job description (at least 50 characters).');
       return;
     }
 
     setIsGenerating(true);
+    setError(null);
+    setTailoredResume('');
+    setCoverLetter('');
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY || '' });
-      
-      const prompt = `
-        You are an expert career coach. 
-        Based on the following Job Description and my Resume, please generate:
-        1. A tailored version of my resume that highlights relevant skills and experiences.
-        2. A professional cover letter.
+      const formData = new FormData();
+      formData.append('resume', resumeFile);
+      formData.append('job_description', jobDescription);
 
-        Job Description:
-        ${jobDescription}
+      // Build request headers
+      const headers: Record<string, string> = {};
 
-        My Resume:
-        ${resumeText || "Standard software engineer resume with React, Node, and TypeScript experience."}
+      if (aiConfig.apiKey.trim()) {
+        headers['X-API-Key'] = aiConfig.apiKey.trim();
+      }
+      if (aiConfig.provider) {
+        headers['X-AI-Provider'] = aiConfig.provider;
+      }
+      if (aiConfig.model.trim()) {
+        headers['X-AI-Model'] = aiConfig.model.trim();
+      }
 
-        Format the output as a JSON object with two fields: "resume" and "coverLetter".
-      `;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash", // Using a stable model
-        contents: [{ parts: [{ text: prompt }] }],
-        config: {
-          responseMimeType: "application/json",
-        }
+      const response = await fetch(`${API_BASE_URL}/process-resume`, {
+        method: 'POST',
+        headers,
+        body: formData,
       });
 
-      const result = JSON.parse(response.text || '{}');
-      setTailoredResume(result.resume || "Tailored resume content...");
-      setCoverLetter(result.coverLetter || "Cover letter content...");
-    } catch (error) {
-      console.error("Generation failed:", error);
-      // Fallback for demo if API fails
-      setTailoredResume("Tailored Resume:\n- Highlighted React and TypeScript skills\n- Focused on cloud architecture experience\n- Quantified achievements at TechCorp");
-      setCoverLetter("Dear Hiring Manager,\n\nI am writing to express my strong interest in the Software Engineer position...");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        const message =
+          errorData?.detail ||
+          errorData?.error ||
+          `Server returned ${response.status}`;
+        throw new Error(message);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        setTailoredResume(result.data.tailored_resume || '');
+        setCoverLetter(result.data.cover_letter || '');
+      } else {
+        throw new Error(result.error || 'Unexpected response format.');
+      }
+    } catch (err: any) {
+      console.error('Generation failed:', err);
+      setError(err.message || 'An error occurred while generating. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -71,18 +101,24 @@ export default function Page() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header onOpenConfig={() => setIsConfigOpen(true)} />
-      
+      <Header
+        onOpenConfig={() => setIsConfigOpen(true)}
+        provider={aiConfig.provider}
+        hasApiKey={!!aiConfig.apiKey.trim()}
+      />
+
       <main className="flex-1 max-w-7xl mx-auto w-full p-6 flex flex-col gap-6">
-        <InputSection 
+        <InputSection
           jobDescription={jobDescription}
           setJobDescription={setJobDescription}
+          resumeFile={resumeFile}
           onResumeUpload={handleResumeUpload}
           onGenerate={generateApplication}
           isGenerating={isGenerating}
+          error={error}
         />
 
-        <ResultsSection 
+        <ResultsSection
           tailoredResume={tailoredResume}
           coverLetter={coverLetter}
           isGenerating={isGenerating}
@@ -90,12 +126,15 @@ export default function Page() {
       </main>
 
       <footer className="p-6 text-center">
-        <p className="text-xs text-slate-400">© 2024 evo AI Systems • Powered by advanced language models</p>
+        <p className="text-xs text-slate-400">© 2025 evo AI Systems • Powered by advanced language models</p>
       </footer>
 
-      <ConfigModal 
-        isOpen={isConfigOpen} 
-        onClose={() => setIsConfigOpen(false)} 
+      <ConfigModal
+        isOpen={isConfigOpen}
+        onClose={() => setIsConfigOpen(false)}
+        config={aiConfig}
+        onSave={setAiConfig}
+        apiBaseUrl={API_BASE_URL}
       />
     </div>
   );
