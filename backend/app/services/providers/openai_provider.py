@@ -5,7 +5,7 @@ and any other provider that exposes an OpenAI-compatible chat completions API.
 """
 
 import logging
-from openai import OpenAI
+from openai import AsyncOpenAI
 
 from app.services.providers.base import BaseProvider
 
@@ -52,7 +52,9 @@ class OpenAICompatibleProvider(BaseProvider):
 
     async def generate(self, system_prompt: str, user_prompt: str) -> str:
         """Send prompts via the OpenAI-compatible chat completions API."""
-        client = OpenAI(api_key=self.api_key, base_url=self.base_url)
+        # Use AsyncOpenAI so the API call is properly awaited and never
+        # blocks FastAPI's async event loop.
+        client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
 
         logger.info(
             "Sending request to %s model '%s' (base: %s)...",
@@ -61,7 +63,7 @@ class OpenAICompatibleProvider(BaseProvider):
             self.base_url,
         )
 
-        response = client.chat.completions.create(
+        response = await client.chat.completions.create(
             model=self.model,
             messages=[
                 {"role": "system", "content": system_prompt},

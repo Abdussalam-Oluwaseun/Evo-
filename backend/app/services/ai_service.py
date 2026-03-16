@@ -6,6 +6,7 @@ based on the user's request headers.
 
 import json
 import logging
+import re
 
 from app.config import settings
 from app.models import TailoredOutput
@@ -146,12 +147,11 @@ def _parse_ai_response(raw_text: str) -> TailoredOutput:
     """
     cleaned = raw_text.strip()
 
-    # Strip markdown code fences if present
-    if cleaned.startswith("```"):
-        first_newline = cleaned.index("\n")
-        cleaned = cleaned[first_newline + 1:]
-    if cleaned.endswith("```"):
-        cleaned = cleaned[:-3].strip()
+    # Strip markdown code fences if present (handles ```json, ```JSON, ``` etc.)
+    # Uses regex to safely handle fences with or without a trailing language tag
+    # or newline, avoiding ValueError from .index() on edge cases.
+    cleaned = re.sub(r'^```[a-zA-Z]*\n?', '', cleaned)
+    cleaned = re.sub(r'\n?```$', '', cleaned).strip()
 
     try:
         data = json.loads(cleaned)

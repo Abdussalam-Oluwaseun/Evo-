@@ -3,8 +3,8 @@ Application configuration and settings.
 Loads environment variables with fallback defaults.
 """
 
-from pydantic_settings import BaseSettings
 from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -13,6 +13,11 @@ class Settings(BaseSettings):
     The GEMINI_API_KEY serves as the system-level fallback
     when a user does not provide their own key in the request header.
     """
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
 
     app_name: str = "Evo Resume Tailoring API"
     app_version: str = "1.0.0"
@@ -38,10 +43,22 @@ class Settings(BaseSettings):
         description="Controls randomness in AI output. Lower = more deterministic.",
     )
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    # CORS — comma-separated list of allowed origins, e.g.:
+    # ALLOWED_ORIGINS=https://myapp.com,https://www.myapp.com
+    # Leave empty (default) to allow all origins during development.
+    allowed_origins: str = Field(
+        default="",
+        description="Comma-separated list of allowed CORS origins. Empty = allow all.",
+    )
+
+    @property
+    def cors_origins(self) -> list[str]:
+        """Returns the parsed list of allowed origins, or ['*'] if unset."""
+        if self.allowed_origins.strip():
+            return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
+        return ["*"]
 
 
 # Singleton settings instance
 settings = Settings()
+

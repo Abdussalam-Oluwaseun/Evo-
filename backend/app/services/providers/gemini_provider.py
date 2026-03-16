@@ -3,6 +3,7 @@ Google Gemini AI provider.
 Uses the google-generativeai SDK.
 """
 
+import asyncio
 import logging
 
 import google.generativeai as genai
@@ -30,7 +31,9 @@ class GeminiProvider(BaseProvider):
         )
 
         logger.info("Sending request to Gemini model '%s'...", self.model)
-        response = model.generate_content(user_prompt)
+        # generate_content is synchronous — run in a thread pool to
+        # avoid blocking FastAPI's async event loop.
+        response = await asyncio.to_thread(model.generate_content, user_prompt)
 
         if not response.text:
             from app.services.ai_service import AIServiceError

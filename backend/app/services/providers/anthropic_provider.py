@@ -1,6 +1,6 @@
 """
 Anthropic Claude provider.
-Uses the official Anthropic Python SDK.
+Uses the official Anthropic Python SDK (async client).
 """
 
 import logging
@@ -17,11 +17,13 @@ class AnthropicProvider(BaseProvider):
 
     async def generate(self, system_prompt: str, user_prompt: str) -> str:
         """Send prompts to Anthropic Claude and return the raw response text."""
-        client = anthropic.Anthropic(api_key=self.api_key)
+        # Use AsyncAnthropic so the API call is properly awaited and never
+        # blocks FastAPI's async event loop.
+        client = anthropic.AsyncAnthropic(api_key=self.api_key)
 
         logger.info("Sending request to Anthropic model '%s'...", self.model)
 
-        message = client.messages.create(
+        message = await client.messages.create(
             model=self.model,
             max_tokens=self.max_output_tokens,
             temperature=self.temperature,

@@ -50,7 +50,7 @@ export default function ConfigModal({ isOpen, onClose, config, onSave, apiBaseUr
           openai: { default_model: 'gpt-4o' },
           anthropic: { default_model: 'claude-sonnet-4-20250514' },
           deepseek: { default_model: 'deepseek-chat' },
-          groq: { default_model: 'mixtral-8x7b-32768' },
+          groq: { default_model: 'llama-3.3-70b-versatile' },
           openrouter: { default_model: 'gpt-4o' },
           together: { default_model: 'meta-llama/Llama-3-70b-chat-hf' },
           mistral: { default_model: 'mistral-large-latest' },

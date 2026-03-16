@@ -108,7 +108,7 @@ export default function ResultsSection({ tailoredResume, coverLetter, isGenerati
           ) : (
             <div className="h-full flex flex-col items-center justify-center p-6 text-center">
               <Wand2 className="text-slate-400 mb-2" size={40} />
-              <p className="mt-8 text-slate-400 text-xs italic">Generate content to preview your tailored resume </p>
+              <p className="mt-8 text-slate-400 text-xs italic">Generate content to preview your cover letter</p>
             </div>
           )}
         </div>

@@ -2,8 +2,10 @@
 Evo Resume Tailoring API — Entry Point
 
 A stateless FastAPI backend that accepts a PDF resume and a job description,
-then uses Google Gemini AI to produce an ATS-optimized tailored resume and
-a personalized cover letter. No database. No storage. Fresh start every request.
+then uses a user-selected AI provider (Gemini, OpenAI, Anthropic, DeepSeek,
+Groq, OpenRouter, Together, Mistral) to produce an ATS-optimized tailored
+resume and a personalized cover letter. No database. No storage. Fresh start
+every request.
 """
 
 import logging
@@ -38,9 +40,13 @@ app = FastAPI(
 )
 
 # ── CORS Middleware ─────────────────────────────────────────────────────
+# CORS origins are controlled via the ALLOWED_ORIGINS env variable.
+# Set it to a comma-separated list of domains in production, e.g.:
+# ALLOWED_ORIGINS=https://myapp.com,https://www.myapp.com
+# Leave it unset (or empty) for local development — defaults to ["*"].
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict in production
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

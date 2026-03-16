@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { UploadCloud, Sparkles, FileCheck2, AlertCircle, X } from 'lucide-react';
 
 interface InputSectionProps {
@@ -22,6 +22,7 @@ export default function InputSection({
   isGenerating,
   error,
 }: InputSectionProps) {
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -32,6 +33,34 @@ export default function InputSection({
       }
       onResumeUpload(file);
     }
+  };
+
+  const processDroppedFile = (file: File) => {
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      alert('Only PDF files are accepted. Please upload a .pdf file.');
+      return;
+    }
+    onResumeUpload(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) processDroppedFile(file);
   };
 
   return (
@@ -70,13 +99,28 @@ export default function InputSection({
               </label>
             </div>
           ) : (
-            <label className="flex-1 border-2 border-dashed border-slate-200 hover:border-[#135bec]/50 transition-colors rounded-xl p-6 flex flex-col items-center justify-center gap-3 bg-slate-50/50 group cursor-pointer min-h-[180px]">
+            <label
+              className={`flex-1 border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-3 group cursor-pointer min-h-[180px] transition-colors ${
+                isDragging
+                  ? 'border-[#135bec] bg-[#135bec]/5'
+                  : 'border-slate-200 hover:border-[#135bec]/50 bg-slate-50/50'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
               <input type="file" className="hidden" onChange={handleFileChange} accept=".pdf" />
-              <div className="size-10 rounded-full bg-white shadow-sm border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-[#135bec] transition-colors">
+              <div className={`size-10 rounded-full shadow-sm border flex items-center justify-center transition-colors ${
+                isDragging
+                  ? 'bg-[#135bec]/10 border-[#135bec]/30 text-[#135bec]'
+                  : 'bg-white border-slate-200 text-slate-400 group-hover:text-[#135bec]'
+              }`}>
                 <UploadCloud size={24} />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium text-slate-900">Click to upload or drag</p>
+                <p className="text-sm font-medium text-slate-900">
+                  {isDragging ? 'Drop your PDF here' : 'Click to upload or drag'}
+                </p>
                 <p className="text-[10px] text-slate-500 mt-1">PDF files only, up to 10MB</p>
               </div>
             </label>
@@ -109,3 +153,4 @@ export default function InputSection({
     </section>
   );
 }
+
