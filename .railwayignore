@@ -1,0 +1,16 @@
+node_modules/
+.git/
+.gitignore
+README.md
+app/
+components/
+hooks/
+lib/
+public/
+eslint.config.mjs
+next.config.ts
+tsconfig.json
+package.json
+package-lock.json
+postcss.config.mjs
+.env.example
