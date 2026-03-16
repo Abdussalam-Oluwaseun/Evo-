@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Settings } from 'lucide-react';
-import Image from 'next/image';
 
 const PROVIDER_LABELS: Record<string, string> = {
   gemini: 'Google Gemini',
@@ -53,16 +52,6 @@ export default function Header({ onOpenConfig, provider, hasApiKey }: HeaderProp
           >
             <Settings size={20} />
           </button>
-
-          <div className="size-9 rounded-full bg-slate-200 border border-slate-300 overflow-hidden relative">
-            <Image
-              src="https://picsum.photos/seed/professional/100/100"
-              alt="User profile"
-              fill
-              className="object-cover"
-              referrerPolicy="no-referrer"
-            />
-          </div>
         </div>
       </div>
     </header>

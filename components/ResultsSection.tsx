@@ -11,6 +11,28 @@ interface ResultsSectionProps {
 }
 
 export default function ResultsSection({ tailoredResume, coverLetter, isGenerating }: ResultsSectionProps) {
+  const downloadAsText = (content: string, filename: string) => {
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const handleExportResume = () => {
+    if (tailoredResume) {
+      downloadAsText(tailoredResume, 'tailored-resume.txt');
+    }
+  };
+
+  const handleExportCoverLetter = () => {
+    if (coverLetter) {
+      downloadAsText(coverLetter, 'cover-letter.txt');
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
       {/* Section 2: Tailored Resume */}
@@ -20,7 +42,11 @@ export default function ResultsSection({ tailoredResume, coverLetter, isGenerati
             <FileText className="text-[#135bec]" size={18} />
             <span className="text-sm font-bold text-slate-900">Tailored Resume</span>
           </div>
-          <button className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#135bec] transition-colors bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+          <button
+            onClick={handleExportResume}
+            disabled={!tailoredResume || isGenerating}
+            className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#135bec] transition-colors bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Download size={14} />
             Export
           </button>
@@ -42,6 +68,7 @@ export default function ResultsSection({ tailoredResume, coverLetter, isGenerati
             </div>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-center">
+              <Wand2 className="text-slate-400 mb-2" size={40} />
               <div className="mt-8 text-slate-400 text-xs italic">
                 Generate content to preview your tailored resume
               </div>
@@ -57,7 +84,11 @@ export default function ResultsSection({ tailoredResume, coverLetter, isGenerati
             <Mail className="text-[#135bec]" size={18} />
             <span className="text-sm font-bold text-slate-900">Cover Letter</span>
           </div>
-          <button className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#135bec] transition-colors bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+          <button
+            onClick={handleExportCoverLetter}
+            disabled={!coverLetter || isGenerating}
+            className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#135bec] transition-colors bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Download size={14} />
             Export
           </button>
@@ -76,8 +107,8 @@ export default function ResultsSection({ tailoredResume, coverLetter, isGenerati
             </div>
           ) : (
             <div className="h-full flex flex-col items-center justify-center p-6 text-center">
-              <Wand2 className="text-slate-300 mb-2" size={40} />
-              <p className="text-sm text-slate-500">AI-generated content will appear here after clicking &apos;Generate&apos;</p>
+              <Wand2 className="text-slate-400 mb-2" size={40} />
+              <p className="mt-8 text-slate-400 text-xs italic">Generate content to preview your tailored resume </p>
             </div>
           )}
         </div>
